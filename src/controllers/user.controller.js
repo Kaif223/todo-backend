@@ -1,0 +1,52 @@
+const UserData = require('../../modals/user')
+const { userServices } = require('../services')
+
+
+const userGet = async (req, res) => {
+
+    const data = await UserData.find()
+    res.json(data)
+
+}
+
+const userPost = async (req, res) => {
+
+    const userBody = req.body    
+    if (!userBody.userName) {
+        return res.status(400).json({
+            message: "userName is reqiured"
+        })
+    }
+  
+    const data = await userServices.postUser(userBody)
+    res.json({
+        message: "user is save",
+        user: data
+    })
+
+}
+
+const userDelete = async (req, res) => {
+
+    const id = req.params.id
+    const data = await UserData.findByIdAndDelete(id)
+    res.json({
+        message: "user is delete",
+        user: data
+    })
+}
+
+const userPatch = async (req, res) => {
+
+    const userId = req.params.id
+    const userBody = req.body
+    const data = await userServices.editUser(userId, userBody)
+
+    res.json({
+        message: "user updated successfully",
+        todo: data
+    })
+}
+
+module.exports = { userGet, userPost, userDelete, userPatch }
+
