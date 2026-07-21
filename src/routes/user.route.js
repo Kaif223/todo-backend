@@ -9,5 +9,7 @@ router.route('/api/userDetail').get(userController.userGet)
 router.route("/api/signup").post(userController.userPost)
 router.route("/api/userDetail/:id").delete(userController.userDelete)
 router.route("/api/userDetail/:id").patch(userController.userPatch)
+router.route("/api/signin").post(userController.userSignin)
+
 
 module.exports = router;
