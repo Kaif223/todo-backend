@@ -15,7 +15,7 @@ app.use(cors())
 
 const port = 8000;
 
-mongoose.connect("mongodb://localhost:27017/todo_practice")
+mongoose.connect("mongodb+srv://zulkaif044_db_user:Kaifrana223@cluster0.pgtsyej.mongodb.net/?appName=Cluster0")
     .then(() => {
         console.log("Database connected")
     })
