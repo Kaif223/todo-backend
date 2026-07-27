@@ -1,10 +1,15 @@
 const UserData = require('../../modals/user')
 const { userServices } = require('../services')
 const bcrypt = require("bcrypt")
+const jwt = require("jsonwebtoken")
+const cookies = require("cookie-parser")
+
+const secret = "secret123"
 
 
 const userGet = async (req, res) => {
 
+    // const token = req.cookies.accessToken
     const data = await UserData.find()
     res.json(data)
 
@@ -56,17 +61,31 @@ const userSignin = async (req, res) => {
     const user = await UserData.findOne({
         userMail: userMail
     })
-    // console.log("🚀 ~ userSignin ~ user:", user)
+
     if (!user) {
         return res.status(404).json({
             message: "user not found"
         })
     }
     const passwordCompare = await bcrypt.compare(password, user.password)
-    // console.log("🚀 ~ userSignin ~ passwordCompare:", passwordCompare)
     if(!passwordCompare){
         return res.status(400).json({error: "invalid email"})
     }
+
+    const payload = {
+        userId: user._id,
+        userMail: user.userMail
+    }
+    const token = jwt.sign(payload, secret, {
+        expiresIn: "15m"
+    })
+
+    const cookies =  res.cookie("accessToken", token, {
+        httpOnly: true,
+        maxAge: 15 * 60 * 1000,
+        secure: false
+    })
+
 
     // if (password !== user.password) {
     //     return res.status(400).json({
@@ -76,10 +95,24 @@ const userSignin = async (req, res) => {
 
     res.json({
         message: "login successfull",
-        user: user
+        user: user,
     })
 
 }
 
-module.exports = { userGet, userPost, userDelete, userPatch, userSignin }
+const userSignout = async(req, res) => {
+
+    const token =  req.cookies.accessToken;
+    if(!token){
+        return res.status(401).json({message: "no active session"})
+    }
+    res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: false
+    })
+
+    return res.status(200).json({message: "successfully logout"})
+}
+
+module.exports = { userGet, userPost, userDelete, userPatch, userSignin, userSignout }
 

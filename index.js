@@ -1,3 +1,4 @@
+require("dotenv").config()
 const express = require("express")
 const cors = require("cors")
 const mongoose = require("mongoose")
@@ -6,16 +7,21 @@ const path = require("path")
 // const Todo = require("./modals/todo")
 // const UserData = require("./modals/user")
 const routes = require("./src/routes/index")
+const cookieParser = require("cookie-parser")
 
 
 const app = express();
 
 app.use(express.json())
-app.use(cors())
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true
+}))
+app.use(cookieParser())
 
-const port = 8000;
+const port = process.env.PORT || 8000;
 
-mongoose.connect("mongodb+srv://zulkaif044_db_user:Kaifrana223@cluster0.pgtsyej.mongodb.net/?appName=Cluster0")
+mongoose.connect(process.env.MONGODB_URI)
     .then(() => {
         console.log("Database connected")
     })
