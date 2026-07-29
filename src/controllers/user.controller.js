@@ -3,6 +3,7 @@ const { userServices } = require('../services')
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const cookies = require("cookie-parser")
+const { signoutService, signinService } = require('../services/user.service')
 
 const secret = "secret123"
 
@@ -55,64 +56,46 @@ const userPatch = async (req, res) => {
 }
 
 const userSignin = async (req, res) => {
+    try {
+        const result = await signinService(req.body);
 
-    const { userMail, password } = req.body
+        res.cookie("accessToken", result.token, {
+            httpOnly: true,
+            secure: false,
+            maxAge: 15 * 60 * 1000,
+        });
 
-    const user = await UserData.findOne({
-        userMail: userMail
-    })
+        return res.status(result.status).json({
+            message: result.message,
+            user: result.user,
+        });
 
-    if (!user) {
-        return res.status(404).json({
-            message: "user not found"
-        })
+    } catch (error) {
+        return res.status(error.status || 500).json({
+            message: error.message,
+        });
     }
-    const passwordCompare = await bcrypt.compare(password, user.password)
-    if(!passwordCompare){
-        return res.status(400).json({error: "invalid email"})
+};
+
+const userSignout = async (req, res) => {
+    try {
+        await signoutService(req.cookies.accessToken);
+
+        res.clearCookie("accessToken", {
+            httpOnly: true,
+            secure: false,
+        });
+
+        return res.status(200).json({
+            message: "Successfully logout",
+        });
+
+    } catch (error) {
+        return res.status(error.status || 500).json({
+            message: error.message,
+        });
     }
-
-    const payload = {
-        userId: user._id,
-        userMail: user.userMail
-    }
-    const token = jwt.sign(payload, secret, {
-        expiresIn: "15m"
-    })
-
-    const cookies =  res.cookie("accessToken", token, {
-        httpOnly: true,
-        maxAge: 15 * 60 * 1000,
-        secure: false
-    })
-
-
-    // if (password !== user.password) {
-    //     return res.status(400).json({
-    //         message: "invalid password"
-    //     })
-    // }
-
-    res.json({
-        message: "login successfull",
-        user: user,
-    })
-
-}
-
-const userSignout = async(req, res) => {
-
-    const token =  req.cookies.accessToken;
-    if(!token){
-        return res.status(401).json({message: "no active session"})
-    }
-    res.clearCookie("accessToken", {
-        httpOnly: true,
-        secure: false
-    })
-
-    return res.status(200).json({message: "successfully logout"})
-}
+};
 
 module.exports = { userGet, userPost, userDelete, userPatch, userSignin, userSignout }
 
