@@ -8,7 +8,9 @@ async function getUser(page, limit) {
     const data = await Todo.find()
         .skip(skip)
         .limit(limit)
-    return data
+    const total = await Todo.countDocuments()
+
+    return { todos: data, total }
 }
 
 async function editTodo(todoId, todoBody) {
