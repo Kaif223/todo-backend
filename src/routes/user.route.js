@@ -11,7 +11,8 @@ router.route("/api/signup").post(userController.userPost)
 router.route("/api/userDetail/:id").delete(verifyToken, userController.userDelete)
 router.route("/api/userDetail/:id").patch(verifyToken, userController.userPatch)
 router.route("/api/signin").post(userController.userSignin)
-router.route("/api/logout").post(verifyToken, userController.userSignout)
+router.route("/api/logout").post(userController.userSignout)
+router.route("/api/refresh").post(userController.userRefreshToken)
 
 
 module.exports = router;

@@ -12,8 +12,13 @@ async function getUser(page, limit) {
 }
 
 async function editTodo(todoId, todoBody) {
-    const data = await Todo.findByIdAndUpdate(todoId, todoBody)
-    console.log("🚀 ~ editTodo ~ data:", data)
+    const data = await Todo.findByIdAndUpdate(
+        todoId,
+        todoBody,
+        {
+            new: true
+        }
+    )
     return data
 }
 module.exports = { getUser, editTodo }

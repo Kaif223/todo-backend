@@ -6,6 +6,7 @@ const cookies = require("cookie-parser")
 const { signoutService, signinService } = require('../services/user.service')
 
 const secret = "secret123"
+const refreshSecret = "refresh123"
 
 
 const userGet = async (req, res) => {
@@ -62,7 +63,12 @@ const userSignin = async (req, res) => {
         res.cookie("accessToken", result.token, {
             httpOnly: true,
             secure: false,
-            maxAge: 15 * 60 * 1000,
+            maxAge: 10 * 1000,
+        });
+        res.cookie("refreshToken", result.refreshToken, {
+            httpOnly: true,
+            secure: false,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
         return res.status(result.status).json({
@@ -97,5 +103,40 @@ const userSignout = async (req, res) => {
     }
 };
 
-module.exports = { userGet, userPost, userDelete, userPatch, userSignin, userSignout }
+const userRefreshToken = async (req, res) => {
+    const token = req.cookies.refreshToken
+    if (!token) {
+        return res.status(401).json({ message: "unauthorized" })
+    }
+    try {
+
+        const decode = jwt.verify(
+            token,
+            refreshSecret
+        )
+
+        const accessToken = jwt.sign(
+            {
+                userId: decode.userId,
+                userMail: decode.userMail,
+            },
+            secret,
+            {
+                expiresIn: "15m",
+            });
+        res.cookie("accessToken", accessToken, {
+            httpOnly: true,
+            secure: false,
+            maxAge: 15 * 60 * 1000,
+        });
+        return res.status(200).json({
+            message: "Access token refreshed",
+        });
+    } catch (error) {
+        return res.status(401).json({ message: "unauthorized" })
+    }
+
+}
+
+module.exports = { userGet, userPost, userDelete, userPatch, userSignin, userSignout, userRefreshToken }
 

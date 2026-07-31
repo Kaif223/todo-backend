@@ -2,6 +2,7 @@ const UserData = require('../../modals/user')
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken");
 const secret = "secret123";
+const refreshSecret = "refresh123"
 
 
 async function postUser(userBody) {
@@ -54,13 +55,17 @@ const signinService = async (data) => {
     };
 
     const token = jwt.sign(payload, secret, {
-        expiresIn: "15m",
+        expiresIn: "10s",
+    });
+    const refreshToken = jwt.sign(payload, refreshSecret, {
+        expiresIn: "7d",
     });
 
     return {
         status: 200,
         message: "Login successful",
         token,
+        refreshToken,
         user,
     };
 };
