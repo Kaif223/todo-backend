@@ -63,7 +63,7 @@ const userSignin = async (req, res) => {
         res.cookie("accessToken", result.token, {
             httpOnly: true,
             secure: false,
-            maxAge: 10 * 1000,
+            maxAge: 15 * 60 * 1000,
         });
         res.cookie("refreshToken", result.refreshToken, {
             httpOnly: true,
@@ -114,7 +114,7 @@ const userRefreshToken = async (req, res) => {
             token,
             refreshSecret
         )
-
+        
         const accessToken = jwt.sign(
             {
                 userId: decode.userId,
