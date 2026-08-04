@@ -12,7 +12,12 @@ const refreshSecret = "refresh123"
 const userGet = async (req, res) => {
 
     // const token = req.cookies.accessToken
-    const data = await UserData.find()
+    // const data = await UserData.find()
+    const page = Number(req.query.page || 1)
+    const limit = Number(req.query.limit || 100)
+    const search = req.query.search
+    const data = await userServices.getUser(page, limit, search)
+
     res.json(data)
 
 }
@@ -38,10 +43,7 @@ const userDelete = async (req, res) => {
 
     const id = req.params.id
     const data = await UserData.findByIdAndDelete(id)
-    res.json({
-        message: "user is delete",
-        user: data
-    })
+    res.json(data)
 }
 
 const userPatch = async (req, res) => {
@@ -50,10 +52,7 @@ const userPatch = async (req, res) => {
     const userBody = req.body
     const data = await userServices.editUser(userId, userBody)
 
-    res.json({
-        message: "user updated successfully",
-        todo: data
-    })
+    res.json(data)
 }
 
 const userSignin = async (req, res) => {
@@ -114,7 +113,7 @@ const userRefreshToken = async (req, res) => {
             token,
             refreshSecret
         )
-        
+
         const accessToken = jwt.sign(
             {
                 userId: decode.userId,

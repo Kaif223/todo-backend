@@ -5,6 +5,28 @@ const secret = "secret123";
 const refreshSecret = "refresh123"
 
 
+async function getUser(page, limit, search) {
+
+    const skip = (page - 1) * limit;
+
+    const query = {};
+
+    if(search){
+        query.userName = {
+            $regex: search,
+            $options: 'i',
+        }
+    }
+
+    const data = await UserData.find(query)
+        .skip(skip)
+        .limit(limit)
+    const total = await UserData.countDocuments(query)
+
+    return { users: data, total }
+}
+
+
 async function postUser(userBody) {
 
     const salt = await bcrypt.genSalt(10)
@@ -23,7 +45,7 @@ async function postUser(userBody) {
 
 async function editUser(userId, userBody) {
 
-    const data = await UserData.findByIdAndUpdate(userId, userBody)
+    const data = await UserData.findByIdAndUpdate(userId, userBody,  { new: true })
     return data
 }
 
@@ -86,6 +108,7 @@ const signoutService = async (token) => {
 module.exports = {
     postUser,
     editUser,
+    getUser,
     signinService,
     signoutService
 }
