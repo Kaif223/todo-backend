@@ -1,14 +1,26 @@
 const Todo = require('../../modals/todo')
 
 
-async function getUser(page, limit) {
+async function getUser(page, limit, search, status) {
 
-    const skip = (page - 1) * limit
+    const skip = (page - 1) * limit;
 
-    const data = await Todo.find()
+    const query = {};
+
+    if(search){
+        query.userName = {
+            $regex: search,
+            $options: 'i',
+        }
+    }
+
+    if(status && status !== 'all'){
+        query.status = status
+    }
+    const data = await Todo.find(query)
         .skip(skip)
         .limit(limit)
-    const total = await Todo.countDocuments()
+    const total = await Todo.countDocuments(query)
 
     return { todos: data, total }
 }
